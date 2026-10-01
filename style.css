@@ -1,52 +1,238 @@
+/* ==========================================
+   RESET & VARIABLES
+   ========================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none; /* Empêche la sélection de texte désagréable pendant le jeu */
+    -webkit-user-select: none;
+}
+
+:root {
+    --bg-color: #f7f7f7;
+    --canvas-bg: #ffffff;
+    --text-color: #535353;
+    --accent-color: #333333;
+    --font-pixel: 'Press Start 2P', monospace, Arial, sans-serif;
+    --btn-bg: #e0e0e0;
+    --btn-hover: #d0d0d0;
+}
+
+/* Mode sombre (activable via JS en ajoutant la classe .dark-mode sur <body>) */
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --canvas-bg: #222222;
+    --text-color: #e0e0e0;
+    --accent-color: #ffffff;
+    --btn-bg: #333333;
+    --btn-hover: #444444;
 }
 
 body {
-    background: #f7f7f7;
-    font-family: Arial, sans-serif;
-
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-pixel);
     display: flex;
     justify-content: center;
     align-items: center;
-
     min-height: 100vh;
+    padding: 20px;
+    transition: background-color 0.3s ease;
 }
 
-.game-container {
-    position: relative;
-}
-
-canvas {
-    background: white;
-    border: 2px solid #333;
-    display: block;
-}
-
-#gameOver {
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-
-    display: none;
-
-    justify-content: center;
-    align-items: center;
+/* ==========================================
+   CONTENEUR PRINCIPAL DU JEU
+   ========================================== */
+.game-wrapper {
+    display: flex;
     flex-direction: column;
-
-    background: rgba(255, 255, 255, 0.85);
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
 }
 
-#gameOver h1 {
-    font-size: 40px;
+/* En-tête & Score */
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
     margin-bottom: 10px;
 }
 
-#gameOver p {
-    font-size: 18px;
+.score-display {
+    font-size: 14px;
+    letter-spacing: 2px;
+    display: flex;
+    gap: 20px;
+}
+
+#highScore {
+    color: #747474;
+}
+
+/* ==========================================
+   CANVAS & OVERLAYS
+   ========================================== */
+.canvas-container {
+    position: relative;
+    width: 100%;
+    background: var(--canvas-bg);
+    border: 3px solid var(--accent-color);
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated; /* Garde le rendu net du Pixel Art */
+}
+
+/* Écrans superposés (Start & Game Over) */
+.overlay-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(2px);
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 10;
+    padding: 20px;
+    text-align: center;
+}
+
+body.dark-mode .overlay-screen {
+    background: rgba(34, 34, 34, 0.88);
+}
+
+.overlay-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.overlay-screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Titres & Textes */
+.overlay-screen h1,
+.overlay-screen h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: var(--accent-color);
+}
+
+.overlay-screen p {
+    font-size: 10px;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+/* Icône Game Over (Flèche recommencer) */
+.game-over-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+    animation: pulse 1.5s infinite;
+}
+
+/* Stylisation des touches clavier <kbd> */
+kbd {
+    background-color: #eee;
+    border: 1px solid #b4b4b4;
+    border-radius: 4px;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px #fff inset;
+    color: #333;
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 3px 6px;
+    white-space: nowrap;
+}
+
+/* Bouton Recommencer */
+.restart-btn {
+    font-family: var(--font-pixel);
+    font-size: 10px;
+    padding: 10px 18px;
+    background-color: var(--accent-color);
+    color: var(--canvas-bg);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.2s ease;
+    margin-top: 10px;
+}
+
+.restart-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.restart-btn:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================
+   CONTRÔLES TACTILES (MOBILE)
+   ========================================== */
+.mobile-controls {
+    display: none; /* Masqué par défaut sur PC */
+    width: 100%;
+    margin-top: 15px;
+    gap: 15px;
+}
+
+.touch-btn {
+    flex: 1;
+    font-family: var(--font-pixel);
+    font-size: 12px;
+    padding: 15px;
+    background-color: var(--btn-bg);
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    touch-action: manipulation;
+}
+
+.touch-btn:active {
+    background-color: var(--btn-hover);
+    transform: translateY(2px);
+}
+
+/* Affichage des boutons tactiles uniquement sur les écrans tactiles/mobiles */
+@media (max-width: 768px), (pointer: coarse) {
+    .mobile-controls {
+        display: flex;
+    }
+
+    .overlay-screen h1,
+    .overlay-screen h2 {
+        font-size: 16px;
+    }
+
+    .overlay-screen p {
+        font-size: 8px;
+    }
+}
+
+/* Animation */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }

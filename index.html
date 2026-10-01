@@ -3,22 +3,57 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T-Rex Runner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Joue au jeu classique du T-Rex Dinosaure directement dans ton navigateur.">
+    <title>T-Rex Runner - Jeu du Dinosaure</title>
+    
+    <!-- Préconnexion pour charger des polices personnalisées si besoin (ex: Press Start 2P) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="game-container">
-        <canvas id="gameCanvas" width="900" height="300"></canvas>
+    <main class="game-wrapper" role="application" aria-label="Jeu du Dinosaure T-Rex">
+        
+        <!-- Zone d'affichage du Score & En-tête -->
+        <header class="game-header">
+            <div id="scoreDisplay" class="score-display">
+                <span id="highScore">HI 00000</span>
+                <span id="currentScore">00000</span>
+            </div>
+        </header>
 
-        <div id="gameOver">
-            <h1>GAME OVER</h1>
-            <p>Appuie sur ESPACE pour recommencer</p>
+        <!-- Canvas du Jeu -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="900" height="300"></canvas>
+
+            <!-- Écran de Départ -->
+            <div id="startScreen" class="overlay-screen active">
+                <h2>T-REX RUNNER</h2>
+                <p>Appuie sur <kbd>ESPACE</kbd> ou <kbd>&uparrow;</kbd> pour commencer</p>
+            </div>
+
+            <!-- Écran Game Over -->
+            <div id="gameOver" class="overlay-screen hidden" aria-live="polite">
+                <div class="game-over-icon" aria-hidden="true">&#x21BB;</div>
+                <h1>GAME OVER</h1>
+                <p>Appuie sur <kbd>ESPACE</kbd> pour recommencer</p>
+                <button id="restartBtn" class="restart-btn" type="button">Recommencer</button>
+            </div>
         </div>
-    </div>
 
-    <script src="game.js"></script>
+        <!-- Contrôles Tactiles pour Mobiles & Tablettes -->
+        <div class="mobile-controls" aria-label="Contrôles tactiles">
+            <button id="btnCrouch" class="touch-btn" type="button" aria-label="S'accroupir">&#x2193; Bas</button>
+            <button id="btnJump" class="touch-btn" type="button" aria-label="Sauter">&#x2191; Sauter</button>
+        </div>
+
+    </main>
+
+    <!-- Script du Jeu -->
+    <script src="game.js" defer></script>
 </body>
 </html>
-```
